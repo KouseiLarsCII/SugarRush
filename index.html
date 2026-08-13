@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Apex Grand Prix</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="game-container">
+    <!-- UI Overlay / HUD -->
+    <div id="hud">
+      <div class="hud-card speed-card">
+        <span class="hud-label">SPEED</span>
+        <div class="speed-value"><span id="speed">0</span> <small>MPH</small></div>
+        <div class="speed-bar-bg"><div id="speed-bar"></div></div>
+      </div>
+
+      <div class="hud-card lap-card">
+        <span class="hud-label">LAP</span>
+        <div class="lap-value"><span id="current-lap">1</span><small>/3</small></div>
+      </div>
+
+      <div class="hud-card rank-card">
+        <span class="hud-label">RANK</span>
+        <div class="rank-value"><span id="position">1</span><small>/4</small></div>
+      </div>
+
+      <!-- Mini-Map Radar -->
+      <div id="minimap-container">
+        <canvas id="minimap" width="140" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- Countdown Display -->
+    <div id="countdown-display"></div>
+
+    <!-- Start / Pause Menu -->
+    <div id="menu">
+      <div class="menu-content">
+        <div class="badge">SEASON PASS</div>
+        <h1>APEX GRAND PRIX</h1>
+        <p class="subtitle">Outmaneuver opponent AI through elevated hairpin hills and sharp turns across 3 laps.</p>
+
+        <div class="controls-guide">
+          <div class="control-title">RACER CONTROLS</div>
+          <div class="control-item">
+            <span class="action">STEER / DRIVE</span>
+            <div><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> or <span class="key">ARROWS</span></div>
+          </div>
+          <div class="control-item">
+            <span class="action">NITRO BOOST</span>
+            <span class="key wide">SPACE BAR</span>
+          </div>
+        </div>
+
+        <button id="start-btn">
+          <span>START RACE</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <!-- Modern UI/UX Bottom Control Bar -->
+        <div class="modern-bottom-bar">
+          <div class="volume-slider-wrapper">
+            <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <input type="range" id="menu-volume-slider" min="0" max="1" step="0.05" value="0.5">
+          </div>
+          <button id="menu-settings-btn" class="icon-settings-btn" title="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over / Race Results Modal -->
+    <div id="results-modal" style="display: none;">
+      <div class="results-content">
+        <div id="results-badge" class="badge gold">VICTORY</div>
+        <h2 id="results-title">GRAND PRIX CHAMPION!</h2>
+        <div class="score-display">
+          <span class="score-label">FINAL SCORE</span>
+          <div id="final-score">0</div>
+        </div>
+
+        <div class="standings-board">
+          <div class="board-title">FINAL STANDINGS</div>
+          <div id="standings-list"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="restart-btn" class="action-btn primary">RESTART RACE</button>
+          <button id="main-menu-btn" class="action-btn secondary">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="canvas-container"></div>
+  </div>
+
+<script src="scenery.js"></script>
+<script src="rank.js"></script>
+<script src="karts.js"></script>
+<script src="kartbehavior.js"></script>
+<script src="music.js"></script>
+<script src="settings.js"></script>
+<script src="menu.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
